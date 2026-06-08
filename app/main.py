@@ -12,21 +12,21 @@ import app.core.logging as logging
 
 logging.setup_logging()
 
-app = FastAPI(title="CodeHub",docs_url=None)
+app = FastAPI(title="CodeHub")
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR = os.path.join(BASE_DIR, "..", "static")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
-@app.get("/docs", include_in_schema=False)
-async def custom_docs():
-    return get_swagger_ui_html(
-        openapi_url="/openapi.json",
-        title="Docs",
-        swagger_js_url="/static/swagger/swagger-ui-bundle.js",
-        swagger_css_url="/static/swagger/swagger-ui.css",
-    )
+# @app.get("/docs", include_in_schema=False)
+# async def custom_docs():
+#     return get_swagger_ui_html(
+#         openapi_url="/openapi.json",
+#         title="Docs",
+#         swagger_js_url="/static/swagger/swagger-ui-bundle.js",
+#         swagger_css_url="/static/swagger/swagger-ui.css",
+#     )
 
 # CORS
 app.add_middleware(

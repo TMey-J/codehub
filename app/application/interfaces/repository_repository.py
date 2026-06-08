@@ -10,7 +10,19 @@ class IRepositoryRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_by_id(self, repository_id: int) -> Optional[Repository]:
+    async def update(self, repository: Repository) -> Repository | None:
+        pass
+
+    @abstractmethod
+    async def remove(self, repository:RepositoryModel):
+        pass
+
+    @abstractmethod
+    async def get_by_id(self, repository_id: int,owner_id: Optional[int] = None) -> Optional[Repository]:
+        pass
+
+    @abstractmethod
+    async def get_model_by_id(self, repository_id: int,owner_id: Optional[int] = None) -> Optional[RepositoryModel]:
         pass
 
     @abstractmethod

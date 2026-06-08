@@ -10,6 +10,7 @@ from app.core.settings import settings
 from app.infrastructure.database.base import Base
 from app.infrastructure.database.models.user import UserModel
 from app.infrastructure.database.models.repository import RepositoryModel
+from app.infrastructure.database.models.file import FileModel
 
 # this is the Alembic Config object
 config = context.config

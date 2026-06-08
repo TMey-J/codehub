@@ -3,6 +3,9 @@ from datetime import datetime
 from enum import Enum
 from typing import Optional
 
+from app.core.helpers import format_dt
+
+
 class RepositoryVisibility(str, Enum):
     PUBLIC = "public"
     PRIVATE = "private"
@@ -26,6 +29,6 @@ class Repository:
             "visibility": self.visibility.value,
             "description": self.description,
             "language": self.language,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
-            "updated_at": self.updated_at.isoformat() if self.updated_at else None
+            "created_at":format_dt(self.created_at),
+            "updated_at": format_dt(self.updated_at),
         }

@@ -9,3 +9,5 @@ bcrypt
 python-jose[cryptography]
 pydantic[email]
 alembic
+python-multipart
+swagger-ui-bundle

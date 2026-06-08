@@ -10,28 +10,53 @@ from app.core.security import get_current_user
 from app.domain.entities.user import User
 from app.infrastructure.database.session import get_db
 from app.schemas import ApiResponse
-from app.schemas.repository import RepositoryResponse, RepositoryRequestBase
+from app.schemas.repository import RepositoryResponse, UpdateRepositoryCommand, DeleteRepositoryCommand
 
 router = APIRouter()
 
 @router.post("", response_model=ApiResponse[RepositoryResponse])
 async def create_repository(
-    request: RepositoryRequestBase,
+    request: CreateRepositoryCommand,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     try:
         use_case = await dependencies.get_create_repository_use_case(db,current_user)
-        command = CreateRepositoryCommand(
-            name=request.name,
-            description=request.description,
-            language=request.language,
-            visibility=request.visibility
-        )
-        repository = await use_case.execute(command)
+        repository = await use_case.execute(request)
         return ApiResponse(is_success=True,errors=[],response=RepositoryResponse(**repository.to_dict()))
     except ValueError as e:
         raise AppException(status_code=400, message=str(e))
+
+
+@router.put("", response_model=ApiResponse[RepositoryResponse])
+async def update_repository(
+    request: UpdateRepositoryCommand,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    try:
+        use_case = await dependencies.get_update_repository_use_case(db,current_user)
+        repository = await use_case.execute(request)
+        if repository is None:
+            raise AppException(status_code=400, message="Repository not found.")
+        return ApiResponse(is_success=True,errors=[],response=RepositoryResponse(**repository.to_dict()))
+    except ValueError as e:
+        raise AppException(status_code=400, message=str(e))
+
+
+@router.delete("", response_model=ApiResponse)
+async def delete_repository(
+    request: DeleteRepositoryCommand,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    try:
+        use_case = await dependencies.get_delete_repository_use_case(db,current_user)
+        await use_case.execute(request)
+        return ApiResponse(is_success=True,errors=[])
+    except ValueError as e:
+        raise AppException(status_code=400, message=str(e))
+
 
 @router.get("", response_model=ApiResponse[List[RepositoryResponse]])
 async def get_repositories(

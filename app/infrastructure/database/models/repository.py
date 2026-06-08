@@ -1,4 +1,4 @@
-﻿# app/infrastructure/database/models/repository.py
+﻿#
 from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Enum as SQLEnum
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -20,3 +20,7 @@ class RepositoryModel(Base):
 
     # Relationships
     owner = relationship("UserModel", back_populates="repositories")
+    files = relationship(
+        "FileModel",
+        cascade="all, delete-orphan"
+    )

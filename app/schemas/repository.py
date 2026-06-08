@@ -1,5 +1,4 @@
 ﻿from pydantic import BaseModel, Field, field_validator
-from datetime import datetime
 from typing import Optional
 from app.domain.entities.repository import RepositoryVisibility
 import re
@@ -48,6 +47,8 @@ class RepositoryRequestBase(BaseModel):
 class CreateRepositoryCommand(RepositoryRequestBase):
     pass
 
+class UpdateRepositoryCommand(RepositoryRequestBase):
+    id: int
 
 class RepositoryUpdate(BaseModel):
     name: Optional[str] = Field(
@@ -98,8 +99,11 @@ class RepositoryUpdate(BaseModel):
 class RepositoryResponse(RepositoryRequestBase):
     id: int
     owner_id: int
-    created_at: datetime
-    updated_at: datetime
+    created_at: str
+    updated_at: str
 
     class Config:
         from_attributes = True
+
+class DeleteRepositoryCommand(BaseModel):
+    id: int = Field()

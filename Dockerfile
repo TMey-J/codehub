@@ -5,7 +5,7 @@ WORKDIR /app
 # Install dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir \
-    --index-url https://mirror2.chabokan.net/pypi/simple/ \
+    --index-url https://pypi.org/simple \
     -r requirements.txt
 
 # Copy application code

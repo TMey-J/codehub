@@ -25,3 +25,11 @@ class IFileRepository(ABC):
     @abstractmethod
     async def remove_all_by_repository_id(self, repository_id: int):
         pass
+
+    @abstractmethod
+    async def get_by_path(
+            self,
+            repository_id: int,
+            relative_path: str
+    ):
+        pass

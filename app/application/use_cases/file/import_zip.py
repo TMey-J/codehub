@@ -1,4 +1,5 @@
-﻿import shutil
+﻿import asyncio
+import shutil
 from pathlib import Path
 from zipfile import ZipFile
 from fastapi import UploadFile
@@ -52,8 +53,6 @@ class ImportZipUseCase:
 
         temp_zip.write_bytes(content)
 
-        uploaded_files = []
-
         extract_path = Path(
             f"storage/repositories/{repository_id}"
         )
@@ -69,7 +68,7 @@ class ImportZipUseCase:
 
         with ZipFile(temp_zip, "r") as zip_ref:
 
-            zip_ref.extractall(extract_path)
+            await asyncio.to_thread(zip_ref.extractall, extract_path)
 
             for file_info in zip_ref.infolist():
 
@@ -101,12 +100,6 @@ class ImportZipUseCase:
                     entity
                 )
 
-                uploaded_files.append(
-                    saved
-                )
-
         temp_zip.unlink(
             missing_ok=True
         )
-
-        return uploaded_files

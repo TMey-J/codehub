@@ -10,15 +10,36 @@ class UpdateRepositoryUseCase:
         self.user = user
 
     async def execute(self, command: UpdateRepositoryCommand) -> Repository | None:
-        repository = await self.repository_repository.get_by_name(command.name,self.user.id)
-        if repository:
-            raise ValueError("you already have one repository with this name")
+
+        current_repository = await self.repository_repository.get_by_id(
+            command.id,
+            self.user.id
+        )
+
+        if current_repository is None:
+            raise ValueError("Repository not found")
+
+        duplicate_repository = await self.repository_repository.get_by_name(
+            command.name,
+            self.user.id
+        )
+
+        if (
+                duplicate_repository is not None
+                and duplicate_repository.id != command.id
+        ):
+            raise ValueError(
+                "you already have one repository with this name"
+            )
+
         repository=Repository(
             id=command.id,
             name=command.name,
             owner_id=self.user.id,
             language=command.language,
             visibility=command.visibility,
-            description=command.description
+            description=command.description,
+            created_at=current_repository.created_at,
+            owner_name=current_repository.owner_name
         )
         return await self.repository_repository.update(repository)

@@ -10,7 +10,7 @@ class CreateRepositoryUseCase:
         self.user = user
 
     async def execute(self, command: CreateRepositoryCommand) -> Repository:
-        repository = await self.repository_repository.get_by_name(command.name,self.user.id)
+        repository:Repository = await self.repository_repository.get_by_name(command.name,self.user.id)
         if repository:
             raise ValueError("you already have one repository with this name")
         repository=Repository(
@@ -18,6 +18,7 @@ class CreateRepositoryUseCase:
             owner_id=self.user.id,
             language=command.language,
             visibility=command.visibility,
-            description=command.description
+            description=command.description,
+            owner_name=None
         )
         return await self.repository_repository.create(repository)

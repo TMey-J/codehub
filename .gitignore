@@ -28,3 +28,4 @@ logs/
 *.log
 
 storage/repositories/*
+tmp/*

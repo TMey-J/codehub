@@ -11,3 +11,4 @@ pydantic[email]
 alembic
 python-multipart
 swagger-ui-bundle
+sambanova

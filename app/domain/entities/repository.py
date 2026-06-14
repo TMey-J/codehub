@@ -14,6 +14,7 @@ class RepositoryVisibility(str, Enum):
 class Repository:
     name: str
     owner_id: int
+    owner_name: str
     visibility: RepositoryVisibility=RepositoryVisibility.PUBLIC
     description: Optional[str] = None
     id: Optional[int] = None
@@ -26,6 +27,7 @@ class Repository:
             "id": self.id,
             "name": self.name,
             "owner_id": self.owner_id,
+            "owner_name": self.owner_name,
             "visibility": self.visibility.value,
             "description": self.description,
             "language": self.language,

@@ -2,16 +2,14 @@
 
 from app.application.interfaces.repository_repository import IRepositoryRepository
 from app.domain.entities.repository import Repository
-from app.domain.entities.user import User
 
 
 class GetRepositoryUseCase:
-    def __init__(self, repository_repository: IRepositoryRepository,user:User):
+    def __init__(self, repository_repository: IRepositoryRepository):
         self.repository_repository = repository_repository
-        self.user = user
 
-    async def execute(self,repo_name) -> List[Repository]:
-        repository:Repository = await self.repository_repository.get_by_name(repo_name,self.user.id)
+    async def execute(self,owner_name,repo_name) -> List[Repository]:
+        repository:Repository = await self.repository_repository.get_by_name(repo_name,None,owner_name=owner_name)
         if not repository:
-            raise ValueError("you don't have repository with this name")
+            raise ValueError("repository not found")
         return repository

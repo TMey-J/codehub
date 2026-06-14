@@ -26,7 +26,7 @@ class IRepositoryRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_by_name(self, repository_name: str,owner_id: Optional[int] = None) -> Optional[Repository]:
+    async def get_by_name(self, repository_name: str,owner_id: Optional[int] = None,owner_name: Optional[str] = None) -> Optional[Repository]:
         pass
 
     @abstractmethod
@@ -34,15 +34,25 @@ class IRepositoryRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_all(self,owner_id: Optional[int] = None) -> List[Repository]:
+    async def get_all(self, owner_id: Optional[int] = None) -> List[Repository]:
+        pass
+    @abstractmethod
+    async def get_all_with_pagination(
+            self,
+            owner_id: Optional[int] = None,
+            page: int = 1,
+            take: int = 20,
+            search: Optional[str] = None
+    ) -> List[Repository]:
         pass
 
     @staticmethod
     def _map_to_domain(repository_model: RepositoryModel) -> Repository:
-        """Maps a RepositoryModel ORM object to a Repository domain object."""
+
         return Repository(
             name=repository_model.name,
             owner_id=repository_model.owner_id,
+            owner_name=repository_model.owner.username,
             id=repository_model.id,
             description=repository_model.description,
             language=repository_model.language,

@@ -1,11 +1,17 @@
 ﻿from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.application.use_cases.file.delete_file import DeleteFileUseCase
+from app.application.use_cases.file.download_file import DownloadFileUseCase
+from app.application.use_cases.file.download_repository import DownloadRepositoryUseCase
+from app.application.use_cases.file.get_file_content import GetFileContentUseCase
+from app.application.use_cases.file.get_files import GetFilesUseCase
 from app.application.use_cases.file.import_zip import ImportZipUseCase
 from app.application.use_cases.file.upload_file import UploadFileUseCase
 from app.application.use_cases.repository.create_repository import CreateRepositoryUseCase
 from app.application.use_cases.repository.delete_repository import DeleteRepositoryUseCase
 from app.application.use_cases.repository.get_all_repositories import GetAllRepositoriesUseCase
 from app.application.use_cases.repository.get_repository import GetRepositoryUseCase
+from app.application.use_cases.repository.search_repositories import SearchRepositoriesUseCase
 from app.application.use_cases.repository.update_repository import UpdateRepositoryUseCase
 from app.domain.entities.user import User
 from app.infrastructure.database.session import get_db
@@ -14,15 +20,12 @@ from app.infrastructure.repositories.repository_repository import RepositoryRepo
 from app.infrastructure.repositories.user_repository import UserRepository
 from app.application.use_cases.auth.register_user import RegisterUserUseCase
 from app.application.use_cases.auth.login_user import LoginUserUseCase
+from app.infrastructure.services.sambanova_search_service import SambaNovaSearchService
 from app.infrastructure.storage.local_storage import LocalStorageService
 
 
-async def get_user_repository(db: AsyncSession = None):
-    if db is None:
-        async for session in get_db():
-            db = session
-            break
-    return UserRepository(db)
+# async def get_user_repository(db: AsyncSession):
+#     return UserRepository(db)
 
 async def get_register_use_case(db: AsyncSession):
     repo = UserRepository(db)
@@ -44,13 +47,13 @@ async def get_delete_repository_use_case(db: AsyncSession,current_user: User):
     repo = RepositoryRepository(db)
     return DeleteRepositoryUseCase(repo,current_user)
 
-async def get_get_all_repositories_use_case(db: AsyncSession,current_user: User):
+async def get_get_all_repositories_use_case(db: AsyncSession,current_user: User|None):
     repo = RepositoryRepository(db)
     return GetAllRepositoriesUseCase(repo, current_user)
 
-async def get_get_repository_use_case(db: AsyncSession,current_user: User):
+async def get_get_repository_use_case(db: AsyncSession):
     repo = RepositoryRepository(db)
-    return GetRepositoryUseCase(repo, current_user)
+    return GetRepositoryUseCase(repo)
 
 async def get_upload_file_use_case(
     db: AsyncSession,
@@ -73,4 +76,62 @@ async def get_import_zip_use_case(
         file_repository=FileRepository(db),
         storage_service=LocalStorageService(),
         current_user=current_user
+    )
+
+async def get_get_files_use_case(
+    db: AsyncSession
+):
+    return GetFilesUseCase(
+        repository_repository=RepositoryRepository(db),
+        file_repository=FileRepository(db)
+    )
+
+async def get_file_content_use_case(
+    db: AsyncSession
+):
+    return GetFileContentUseCase(
+        repository_repository=RepositoryRepository(db),
+        file_repository=FileRepository(db),
+    )
+
+async def get_download_file_use_case(
+    db: AsyncSession
+):
+    return DownloadFileUseCase(
+        repository_repository=RepositoryRepository(db),
+        file_repository=FileRepository(db)
+    )
+
+async def get_delete_file_use_case(
+    db: AsyncSession,
+    current_user: User
+):
+
+    return DeleteFileUseCase(
+        repository_repository=RepositoryRepository(db),
+        file_repository=FileRepository(db),
+        storage_service=LocalStorageService(),
+        current_user=current_user
+    )
+
+async def get_download_repository_use_case(
+    db: AsyncSession
+):
+
+    return DownloadRepositoryUseCase(
+        repository_repository=RepositoryRepository(
+            db
+        )
+    )
+
+async def get_search_repositories_use_case(
+    db: AsyncSession
+):
+
+    return SearchRepositoriesUseCase(
+        repository_repository=
+            RepositoryRepository(db),
+
+        search_service=
+            SambaNovaSearchService()
     )

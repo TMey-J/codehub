@@ -1,12 +1,15 @@
 ﻿from datetime import datetime, timezone
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, false
+from sqlalchemy import select, false, func
 from typing import Optional, List
+
+from sqlalchemy.orm import selectinload
 
 from app.domain.entities.repository import Repository
 from app.application.interfaces.repository_repository import IRepositoryRepository
 from app.infrastructure.database.models.repository import RepositoryModel
+from app.infrastructure.database.models.user import UserModel
 
 
 class RepositoryRepository(IRepositoryRepository):
@@ -15,7 +18,16 @@ class RepositoryRepository(IRepositoryRepository):
         await self.session.commit()
 
     async def update(self, repository: Repository) -> Repository | None:
-        repository_model =await self.get_by_id(repository.id)
+        stmt = (
+            select(RepositoryModel).where(RepositoryModel.id == repository.id)
+            .options(
+                selectinload(
+                    RepositoryModel.owner
+                )
+            )
+        )
+        result = await self.session.execute(stmt)
+        repository_model:RepositoryModel = result.scalar_one_or_none()
         if repository_model is None:
             return None
         repository_model.name = repository.name
@@ -23,13 +35,94 @@ class RepositoryRepository(IRepositoryRepository):
         repository_model.language = repository.language
         repository_model.description = repository.description
         repository_model.updated_at=datetime.now(timezone.utc)
+        repository_model.created_at=repository.created_at
+        search_text = f"""
+        Name:
+        {repository.name}
+
+        Description:
+        {repository.description or ''}
+
+        Language:
+        {repository.language or ''}
+
+        README:
+        {''}
+        """
+        repository_model.search_text=search_text
         await self.session.commit()
 
-        return repository_model
+        return self._map_to_domain(repository_model)
 
-    async def get_all(self,owner_id: Optional[int] = None) -> List[Repository]:
+    async def get_all_with_pagination(
+            self,
+            owner_id: Optional[int] = None,
+            page: int = 1,
+            take: int = 20,
+            search: Optional[str] = None
+    ) -> List[Repository]:
 
-        stmt=select(RepositoryModel)
+        stmt = (
+            select(RepositoryModel)
+            .options(
+                selectinload(
+                    RepositoryModel.owner
+                )
+            )
+        )
+        count_stmt = select(func.count()).select_from(
+            RepositoryModel
+        )
+        if owner_id is not None:
+            stmt = stmt.where(
+                RepositoryModel.owner_id == owner_id
+            )
+            count_stmt = count_stmt.where(
+                RepositoryModel.owner_id == owner_id
+            )
+
+
+        if search:
+            stmt = stmt.where(
+                RepositoryModel.name.ilike(
+                    f"%{search}%"
+                )
+            )
+            count_stmt = count_stmt.where(
+                RepositoryModel.name.ilike(
+                    f"%{search}%"
+                )
+            )
+
+        total_count = await self.session.scalar(
+            count_stmt
+        )
+        stmt = stmt.order_by(RepositoryModel.updated_at.desc())
+        stmt = (
+            stmt
+            .offset((page - 1) * take)
+            .limit(take)
+        )
+
+        result = await self.session.execute(stmt)
+
+        repositories = result.scalars().all()
+        repositories_model=[self._map_to_domain(repository) for repository in repositories]
+        return {
+            "items": repositories_model,
+            "total_count": total_count
+        }
+
+    async def get_all(self, owner_id: Optional[int] = None) -> List[Repository]:
+
+        stmt = (
+            select(RepositoryModel)
+            .options(
+                selectinload(
+                    RepositoryModel.owner
+                )
+            )
+        )
         if owner_id is not None:
             stmt = stmt.where(RepositoryModel.owner_id == owner_id)
         result = await self.session.execute(stmt)
@@ -41,22 +134,56 @@ class RepositoryRepository(IRepositoryRepository):
         ]
 
     async def create(self, repository: Repository) -> Repository:
+
+        search_text = f"""
+        Name:
+        {repository.name}
+
+        Description:
+        {repository.description or ''}
+
+        Language:
+        {repository.language or ''}
+
+        README:
+        {''}
+        """
         repository_model=RepositoryModel(
             name=repository.name,
             description=repository.description,
             visibility=repository.visibility,
             owner_id=repository.owner_id,
-            language=repository.language
+            language=repository.language,
+            search_text=search_text
         )
-        repository_model.name=repository.name
+
         self.session.add(repository_model)
         await self.session.commit()
         await self.session.refresh(repository_model)
+        result = await self.session.execute(
+            select(RepositoryModel)
+            .options(
+                selectinload(
+                    RepositoryModel.owner
+                )
+            )
+            .where(
+                RepositoryModel.id == repository_model.id
+            )
+        )
 
+        repository_model = result.scalar_one()
         return self._map_to_domain(repository_model)
 
     async def get_by_id(self, repository_id: int,owner_id: Optional[int] = None) -> Optional[Repository]:
-        stmt=select(RepositoryModel).where(RepositoryModel.id == repository_id)
+        stmt = (
+            select(RepositoryModel).where(RepositoryModel.id == repository_id)
+            .options(
+                selectinload(
+                    RepositoryModel.owner
+                )
+            )
+        )
         if owner_id is not None:
             stmt = stmt.where(RepositoryModel.owner_id == owner_id)
         result = await self.session.execute(stmt)
@@ -67,10 +194,24 @@ class RepositoryRepository(IRepositoryRepository):
 
         return self._map_to_domain(repository)
 
-    async def get_by_name(self, repository_name: str,owner_id: Optional[int] = None) -> Optional[Repository]:
-        stmt=select(RepositoryModel).where(RepositoryModel.name == repository_name)
+    async def get_by_name(self, repository_name: str,owner_id: Optional[int] = None,owner_name: Optional[str] = None) -> Optional[Repository]:
+        stmt = (
+            select(RepositoryModel).where(RepositoryModel.name == repository_name)
+            .options(
+                selectinload(
+                    RepositoryModel.owner
+                )
+            )
+        )
         if owner_id is not None:
             stmt = stmt.where(RepositoryModel.owner_id == owner_id)
+        if owner_name is not None:
+            stmt = stmt.where(
+                RepositoryModel.owner.has(
+                    username=owner_name
+                )
+            )
+
         result = await self.session.execute(stmt)
         repository = result.scalar_one_or_none()
 

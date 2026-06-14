@@ -1,5 +1,5 @@
 ﻿from pydantic import BaseModel, Field, field_validator
-from typing import Optional
+from typing import Optional, List
 from app.domain.entities.repository import RepositoryVisibility
 import re
 
@@ -99,6 +99,7 @@ class RepositoryUpdate(BaseModel):
 class RepositoryResponse(RepositoryRequestBase):
     id: int
     owner_id: int
+    owner_name: str
     created_at: str
     updated_at: str
 
@@ -107,3 +108,6 @@ class RepositoryResponse(RepositoryRequestBase):
 
 class DeleteRepositoryCommand(BaseModel):
     id: int = Field()
+
+class SearchRepositoryRequest(BaseModel):
+    query: str

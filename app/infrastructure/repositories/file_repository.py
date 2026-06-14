@@ -86,3 +86,18 @@ class FileRepository(IFileRepository):
         if model:
             await self.session.delete(model)
             await self.session.commit()
+
+    async def get_by_path(
+            self,
+            repository_id: int,
+            relative_path: str
+    ):
+        result = await self.session.execute(
+            select(FileModel)
+            .where(
+                FileModel.repository_id == repository_id,
+                FileModel.relative_path == relative_path
+            )
+        )
+
+        return result.scalar_one_or_none()

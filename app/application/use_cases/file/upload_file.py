@@ -45,6 +45,13 @@ class UploadFileUseCase:
                 files,
                 paths
         ):
+            filename_from_path = os.path.basename(
+                relative_path
+            )
+            if upload_file.filename != filename_from_path.split("/")[-1]:
+                raise ValueError(
+                    f"Filename mismatch: {upload_file.filename} != {relative_path}"
+                )
             content = await upload_file.read()
 
             stored_name, file_path = (
@@ -54,13 +61,30 @@ class UploadFileUseCase:
                     content=content
                 )
             )
+            normalized_path = os.path.normpath(
+                relative_path
+            )
+
+            if normalized_path.startswith(".."):
+                raise ValueError(
+                    "Invalid path"
+                )
+            existing_file = await self.file_repository.get_by_path(
+                repository_id,
+                normalized_path
+            )
+
+            if existing_file:
+                await self.file_repository.remove(
+                    existing_file.id
+                )
 
             file_entity = File(
                 repository_id=repository_id,
 
                 file_name=upload_file.filename,
 
-                relative_path=relative_path,
+                relative_path=normalized_path,
 
                 stored_name=stored_name,
 

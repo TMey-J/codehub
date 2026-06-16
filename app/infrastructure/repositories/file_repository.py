@@ -1,5 +1,8 @@
-﻿from sqlalchemy import select
+﻿from datetime import datetime, timezone
+
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.domain.entities.file import File
 from app.infrastructure.database.models.file import FileModel
@@ -7,6 +10,30 @@ from app.application.interfaces.file_repository import IFileRepository
 
 
 class FileRepository(IFileRepository):
+
+    async def update(self, file: File) -> File | None:
+        stmt = (
+            select(FileModel).where(FileModel.id == file.id)
+            .options(
+                selectinload(
+                    FileModel.repository
+                )
+            )
+        )
+        result = await self.session.execute(stmt)
+        file_model: FileModel = result.scalar_one_or_none()
+
+        if file_model is None:
+            return None
+
+        file_model.file_size = file.file_size
+        file_model.uploaded_at = datetime.now(timezone.utc)
+        file_model.repository.updated_at = datetime.now(timezone.utc)
+
+        await self.session.commit()
+        await self.session.refresh(file_model)
+
+        return file_model
 
     async def remove_all_by_repository_id(self, repository_id: int):
         result = await self.session.execute(
@@ -68,10 +95,17 @@ class FileRepository(IFileRepository):
             select(FileModel)
             .where(FileModel.repository_id == repository_id)
         )
+        files = result.scalars().all()
+
+        for x in files:
+            print(
+                x.id,
+                x.uploaded_at
+            )
 
         return [
             self._map(x)
-            for x in result.scalars().all()
+            for x in files
         ]
 
     async def remove(self, file_id: int):

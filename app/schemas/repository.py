@@ -111,3 +111,12 @@ class DeleteRepositoryCommand(BaseModel):
 
 class SearchRepositoryRequest(BaseModel):
     query: str
+
+class GenerateReadmeRequest(BaseModel):
+    repository_id: int
+    en_response:bool
+
+class GenerateReadmeResponse(BaseModel):
+    has_before:bool
+    content: str | None
+    file_path:str | None

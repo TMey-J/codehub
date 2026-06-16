@@ -47,7 +47,6 @@ class SambaNovaSearchService(
                 "repository_ids":[1,5,10]
             }}
             """
-        print("start")
         response = (
             self.client.chat.completions.create(
                 model="gpt-oss-120b",
@@ -72,7 +71,6 @@ class SambaNovaSearchService(
                 ]
             )
         )
-        print("end")
         content = (
             response
             .choices[0]

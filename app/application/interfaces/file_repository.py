@@ -11,6 +11,10 @@ class IFileRepository(ABC):
         pass
 
     @abstractmethod
+    async def update(self, file: File) -> File | None:
+        pass
+
+    @abstractmethod
     async def get_by_id(self, file_id: int) -> Optional[File]:
         pass
 

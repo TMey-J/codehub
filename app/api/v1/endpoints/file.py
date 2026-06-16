@@ -10,7 +10,8 @@ from app.core.security import get_current_user
 from app.domain.entities.user import User
 from app.infrastructure.database.session import get_db
 from app.schemas import ApiResponse
-from app.schemas.file import FileResponse, FileContentResponse
+from app.schemas.file import FileResponse, FileContentResponse, AnalyzeFileRequest, OptimizationFileRequest, \
+    OptimizationFileResponse, ChangeFileContentRequest
 from fastapi.responses import FileResponse as DownloadFile
 
 router = APIRouter()
@@ -267,5 +268,107 @@ async def download_repository(
 
         raise AppException(
             status_code=404,
+            message=str(ex)
+        )
+
+@router.post("/vulnerability")
+async def vulnerability(
+    request: AnalyzeFileRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(
+        get_current_user
+    )
+):
+    try:
+        use_case = await dependencies.get_vulnerability_use_case(
+            db,
+            current_user
+        )
+
+        result = await use_case.execute(
+            request.file_id,
+            is_en=request.en_response
+        )
+
+        return ApiResponse(
+            is_success=True,
+            errors=[],
+            response=result
+        )
+    except ValueError as ex:
+
+        raise AppException(
+            status_code=400,
+            message=str(ex)
+        )
+    except Exception as ex:
+
+        raise AppException(
+            status_code=500,
+            message=str(ex)
+        )
+
+@router.post("/optimization",response_model=ApiResponse[OptimizationFileResponse])
+async def optimization(
+    request: OptimizationFileRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    try:
+        use_case = await dependencies.get_optimization_use_case(
+            db,
+            current_user
+        )
+
+        result = await use_case.execute(
+            request.file_id
+
+        )
+
+        return ApiResponse(
+            is_success=True,
+            errors=[],
+            response=OptimizationFileResponse(file_id=request.file_id,content=result)
+        )
+    except ValueError as ex:
+
+        raise AppException(
+            status_code=400,
+            message=str(ex)
+        )
+    except Exception as ex:
+
+        raise AppException(
+            status_code=500,
+            message=str(ex)
+        )
+
+@router.put("/changeContent",response_model=ApiResponse[None])
+async def change_content(
+    request: ChangeFileContentRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    try:
+        use_case = await dependencies.get_change_file_content_use_case(
+            db,
+            current_user
+        )
+
+        await use_case.execute(
+            request.file_id,
+            content=request.content
+
+        )
+
+        return ApiResponse(
+            is_success=True,
+            errors=[],
+            response=None
+        )
+    except ValueError as ex:
+
+        raise AppException(
+            status_code=400,
             message=str(ex)
         )

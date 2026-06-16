@@ -30,7 +30,7 @@ class IRepositoryRepository(ABC):
         pass
 
     @abstractmethod
-    async def exists_by_name(self, repository_name: str) -> bool:
+    async def exists_by_id(self, repository_id: str,owner_id: Optional[int] = None) -> bool:
         pass
 
     @abstractmethod

@@ -1,5 +1,6 @@
 ﻿import os
 import uuid
+from pathlib import Path
 
 
 class LocalStorageService:
@@ -42,3 +43,60 @@ class LocalStorageService:
 
         if os.path.exists(path):
             os.remove(path)
+
+
+    async def read_file(
+            self,
+            file_path: str
+    ) -> bytes:
+        path = Path(file_path)
+
+        if not path.exists():
+            raise FileNotFoundError(
+                f"File not found: {file_path}"
+            )
+
+        return path.read_bytes()
+
+    async def write_file(
+            self,
+            file_path: str,
+            content: str
+    ):
+        path = Path(file_path)
+
+        if not path.exists():
+            raise FileNotFoundError(
+                f"File not found: {file_path}"
+            )
+        with open(file_path, "w") as f:
+            f.write(content)
+
+
+    async def save_readme(
+            self,
+            repository_id: int,
+            content: str
+    ) -> tuple[str, str]:
+
+        repository_path = (
+                Path(self.ROOT_PATH)
+                / str(repository_id)
+        )
+
+        repository_path.mkdir(
+            parents=True,
+            exist_ok=True
+        )
+
+        readme_path = repository_path / "README.md"
+
+        readme_path.write_text(
+            content,
+            encoding="utf-8"
+        )
+
+        return (
+            "README.md",
+            str(readme_path)
+        )

@@ -37,3 +37,18 @@ class FileContentResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+class AnalyzeFileRequest(BaseModel):
+    file_id: int
+    en_response:bool
+
+class OptimizationFileRequest(BaseModel):
+    file_id: int
+
+class OptimizationFileResponse(BaseModel):
+    file_id: int
+    content: str
+
+class ChangeFileContentRequest(BaseModel):
+    file_id: int
+    content: str

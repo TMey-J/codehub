@@ -13,7 +13,7 @@ from app.infrastructure.database.session import get_db
 from app.schemas import ApiResponse
 from app.schemas.Pagination import PagedResponse
 from app.schemas.repository import RepositoryResponse, UpdateRepositoryCommand, DeleteRepositoryCommand, \
-    SearchRepositoryRequest
+    SearchRepositoryRequest, GenerateReadmeRequest, GenerateReadmeResponse
 
 router = APIRouter()
 
@@ -185,6 +185,39 @@ async def search_repositories(
             ]
         )
 
+    except Exception as ex:
+
+        raise AppException(
+            status_code=500,
+            message=str(ex)
+        )
+
+@router.post("/readme",response_model=ApiResponse[GenerateReadmeResponse])
+async def generate_readme(
+    request: GenerateReadmeRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    try:
+        use_case = (
+            await dependencies
+            .get_generate_readme_use_case(db,current_user)
+        )
+
+        result = await use_case.execute(
+            request.repository_id,is_en=request.en_response
+        )
+        has_before = result["has_before"]
+        content = result["content"]
+        file_path = result["file_path"]
+
+        return ApiResponse(
+            is_success=True,
+            errors=[],
+            response=GenerateReadmeResponse(has_before=has_before, content=content, file_path=file_path)
+        )
+    except ValueError as e:
+        raise AppException(status_code=404, message=str(e))
     except Exception as ex:
 
         raise AppException(

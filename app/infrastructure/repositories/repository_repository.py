@@ -220,14 +220,21 @@ class RepositoryRepository(IRepositoryRepository):
 
         return self._map_to_domain(repository)
 
-    async def exists_by_name(self, repository_name: str) -> bool:
-        result = await self.session.execute(
+    async def exists_by_id(self, repository_id: str, owner_id: Optional[int] = None) -> bool:
+        stmt = (
             select(RepositoryModel)
-            .where(RepositoryModel.name == repository_name)
-            .exists()
+            .where(RepositoryModel.id == repository_id)
+            .options(selectinload(RepositoryModel.owner))
         )
+        if owner_id is not None:
+            stmt = stmt.where(RepositoryModel.owner_id == owner_id)
 
-        return result.scalar()
+        # Convert to existence check
+        exists_stmt = stmt.exists()
+
+        # Execute and get scalar result
+        result = await self.session.scalar(select(exists_stmt))
+        return result
 
     async def get_model_by_id(self, repository_id: int,owner_id: Optional[int] = None) -> Optional[Repository]:
         stmt=select(RepositoryModel).where(RepositoryModel.id == repository_id)

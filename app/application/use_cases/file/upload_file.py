@@ -1,4 +1,5 @@
 ﻿import os
+from datetime import datetime, timezone
 from typing import List
 
 from fastapi import UploadFile
@@ -7,6 +8,7 @@ from app.application.interfaces.file_repository import IFileRepository
 from app.application.interfaces.repository_repository import IRepositoryRepository
 from app.domain.entities.file import File
 from app.domain.entities.user import User
+from app.infrastructure.database.models.file import FileModel
 from app.infrastructure.storage.local_storage import LocalStorageService
 
 
@@ -69,16 +71,10 @@ class UploadFileUseCase:
                 raise ValueError(
                     "Invalid path"
                 )
-            existing_file = await self.file_repository.get_by_path(
+            existing_file:FileModel = await self.file_repository.get_by_path(
                 repository_id,
                 normalized_path
             )
-
-            if existing_file:
-                await self.file_repository.remove(
-                    existing_file.id
-                )
-
             file_entity = File(
                 repository_id=repository_id,
 
@@ -93,6 +89,10 @@ class UploadFileUseCase:
                 file_size=len(content)
             )
 
-            await self.file_repository.create(
-                file_entity
-            )
+            if existing_file:
+                file_entity.id = existing_file.id
+                await self.file_repository.update(file_entity)
+            else:
+                await self.file_repository.create(
+                    file_entity
+                )

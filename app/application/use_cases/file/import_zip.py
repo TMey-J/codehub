@@ -96,7 +96,7 @@ class ImportZipUseCase:
                     file_size=file_info.file_size
                 )
 
-                saved = await self.file_repository.create(
+                await self.file_repository.create(
                     entity
                 )
 

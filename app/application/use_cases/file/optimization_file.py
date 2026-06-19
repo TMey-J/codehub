@@ -2,6 +2,7 @@
 from app.application.interfaces.repository_repository import IRepositoryRepository
 from app.core.helpers import is_text_file
 from app.domain.entities.user import User
+from app.infrastructure.repositories.ai_request_repository import AIRequestRepository
 from app.infrastructure.services.ai_service import AIService
 from app.infrastructure.storage.local_storage import LocalStorageService
 
@@ -13,6 +14,7 @@ class OptimizationUseCase:
         repository_repository: IRepositoryRepository,
         storage_service: LocalStorageService,
         ai_service: AIService,
+        ai_request_repository: AIRequestRepository,
         user=User
 
     ):
@@ -20,6 +22,7 @@ class OptimizationUseCase:
         self.repository_repository = repository_repository
         self.storage_service = storage_service
         self.ai_service = ai_service
+        self.ai_request_repository = ai_request_repository
         self.user = user
 
     async def execute(
@@ -48,7 +51,10 @@ class OptimizationUseCase:
         content = await self.storage_service.read_file(
             file.file_path
         )
-
+        await self.ai_request_repository.create(
+            user_id=self.user.id,
+            service="optimization"
+        )
         return await self.ai_service.optimization(
             content.decode("utf-8",errors="ignore")
         )

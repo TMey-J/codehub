@@ -15,6 +15,7 @@ TEXT_EXTENSIONS = {
     ".rst", ".tex",                   # Documentation
     ".vue", ".jsx", ".tsx",           # Frontend frameworks
     ".rbxlx", ".lua",                 # Game dev
+    ".toml"
 }
 def format_dt(dt: datetime | None) -> str | None:
     """

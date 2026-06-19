@@ -1,12 +1,12 @@
 ﻿from datetime import datetime, timezone
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, false, func
+from sqlalchemy import select, false, func, or_
 from typing import Optional, List
 
 from sqlalchemy.orm import selectinload
 
-from app.domain.entities.repository import Repository
+from app.domain.entities.repository import Repository, RepositoryVisibility
 from app.application.interfaces.repository_repository import IRepositoryRepository
 from app.infrastructure.database.models.repository import RepositoryModel
 from app.infrastructure.database.models.user import UserModel
@@ -80,12 +80,16 @@ class RepositoryRepository(IRepositoryRepository):
             count_stmt = count_stmt.where(
                 RepositoryModel.owner_id == owner_id
             )
+        else:
+            stmt = stmt.where(RepositoryModel.visibility == RepositoryVisibility.PUBLIC)
+            count_stmt = count_stmt.where(RepositoryModel.visibility == RepositoryVisibility.PUBLIC)
 
 
         if search:
             stmt = stmt.where(
-                RepositoryModel.name.ilike(
-                    f"%{search}%"
+                or_(
+                    RepositoryModel.name.ilike(f"%{search}%"),
+                    RepositoryModel.description.ilike(f"%{search}%")
                 )
             )
             count_stmt = count_stmt.where(
@@ -125,6 +129,7 @@ class RepositoryRepository(IRepositoryRepository):
         )
         if owner_id is not None:
             stmt = stmt.where(RepositoryModel.owner_id == owner_id)
+
         result = await self.session.execute(stmt)
         repositories = result.scalars().all()
 

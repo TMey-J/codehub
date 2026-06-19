@@ -1,5 +1,7 @@
 ﻿from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.application.use_cases.dashboard.get_dashboard_statistics import GetDashboardStatisticsUseCase
+from app.application.use_cases.dashboard.get_user_dashboard_statistics import GetUserDashboardStatisticsUseCase
 from app.application.use_cases.file.delete_file import DeleteFileUseCase
 from app.application.use_cases.file.download_file import DownloadFileUseCase
 from app.application.use_cases.file.download_repository import DownloadRepositoryUseCase
@@ -10,21 +12,25 @@ from app.application.use_cases.file.optimization_file import OptimizationUseCase
 from app.application.use_cases.file.replace_content import ReplaceContentUseCase
 from app.application.use_cases.file.upload_file import UploadFileUseCase
 from app.application.use_cases.file.vulnerability_file import VulnerabilityUseCase
+from app.application.use_cases.repository.check_star import CheckStarUseCase
 from app.application.use_cases.repository.create_repository import CreateRepositoryUseCase
 from app.application.use_cases.repository.delete_repository import DeleteRepositoryUseCase
 from app.application.use_cases.repository.generate_readme import GenerateReadmeUseCase
 from app.application.use_cases.repository.get_all_repositories import GetAllRepositoriesUseCase
 from app.application.use_cases.repository.get_repository import GetRepositoryUseCase
 from app.application.use_cases.repository.search_repositories import SearchRepositoriesUseCase
+from app.application.use_cases.repository.toggle_star import ToggleRepositoryStarUseCase
 from app.application.use_cases.repository.update_repository import UpdateRepositoryUseCase
 from app.domain.entities.user import User
+from app.infrastructure.repositories.ai_request_repository import AIRequestRepository
+from app.infrastructure.repositories.dashboard_repository import DashboardRepository
 from app.infrastructure.repositories.file_repository import FileRepository
 from app.infrastructure.repositories.repository_repository import RepositoryRepository
+from app.infrastructure.repositories.star_repository import RepositoryStarRepository
 from app.infrastructure.repositories.user_repository import UserRepository
 from app.application.use_cases.auth.register_user import RegisterUserUseCase
 from app.application.use_cases.auth.login_user import LoginUserUseCase
 from app.infrastructure.services.ai_service import AIService
-from app.infrastructure.services.sambanova_search_service import SambaNovaSearchService
 from app.infrastructure.storage.local_storage import LocalStorageService
 
 
@@ -133,11 +139,9 @@ async def get_search_repositories_use_case(
 ):
 
     return SearchRepositoriesUseCase(
-        repository_repository=
-            RepositoryRepository(db),
-
-        search_service=
-            SambaNovaSearchService()
+        repository_repository=RepositoryRepository(db),
+        ai_service=AIService(),
+        ai_request_repository=AIRequestRepository(db)
     )
 
 async def get_vulnerability_use_case(
@@ -150,7 +154,8 @@ async def get_vulnerability_use_case(
         storage_service=LocalStorageService(),
         ai_service=AIService(),
         repository_repository = RepositoryRepository(db),
-        user = current_user
+        user = current_user,
+        ai_request_repository=AIRequestRepository(db)
     )
 
 async def get_optimization_use_case(
@@ -163,7 +168,8 @@ async def get_optimization_use_case(
         storage_service=LocalStorageService(),
         ai_service=AIService(),
         repository_repository = RepositoryRepository(db),
-        user=current_user
+        user=current_user,
+        ai_request_repository=AIRequestRepository(db)
     )
 
 async def get_generate_readme_use_case(
@@ -176,7 +182,8 @@ async def get_generate_readme_use_case(
         file_repository=FileRepository(db),
         storage_service=LocalStorageService(),
         ai_service=AIService(),
-        user=current_user
+        user=current_user,
+        ai_request_repository=AIRequestRepository(db)
     )
 
 async def get_change_file_content_use_case(
@@ -189,4 +196,44 @@ async def get_change_file_content_use_case(
         storage_service=LocalStorageService(),
         user=current_user,
         repository_repository=RepositoryRepository(db)
+    )
+
+async def get_toggle_repository_star_use_case(
+    db: AsyncSession,
+    user: User
+):
+    return ToggleRepositoryStarUseCase(
+        repository_repository=
+            RepositoryRepository(db),
+
+        repository_star_repository=
+            RepositoryStarRepository(db),
+
+        user=user
+    )
+async def get_user_dashboard_use_case(
+    db: AsyncSession,
+    user: User
+):
+    return GetUserDashboardStatisticsUseCase(
+        dashboard_repository=DashboardRepository(db),
+        user=user
+    )
+
+async def get_dashboard_use_case(
+    db: AsyncSession
+):
+    return GetDashboardStatisticsUseCase(
+        dashboard_repository=DashboardRepository(db)
+    )
+
+async def get_check_star_use_case(
+    db: AsyncSession,
+    user: User
+):
+    return CheckStarUseCase(
+        repository_star_repository=
+            RepositoryStarRepository(db),
+
+        user=user
     )

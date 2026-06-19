@@ -11,7 +11,7 @@ from app.domain.entities.user import User
 from app.infrastructure.database.session import get_db
 from app.schemas import ApiResponse
 from app.schemas.file import FileResponse, FileContentResponse, AnalyzeFileRequest, OptimizationFileRequest, \
-    OptimizationFileResponse, ChangeFileContentRequest
+    OptimizationFileResponse, ChangeFileContentRequest, VulnerabilityFileResponse
 from fastapi.responses import FileResponse as DownloadFile
 
 router = APIRouter()
@@ -271,7 +271,7 @@ async def download_repository(
             message=str(ex)
         )
 
-@router.post("/vulnerability")
+@router.post("/vulnerability",response_model=ApiResponse[VulnerabilityFileResponse])
 async def vulnerability(
     request: AnalyzeFileRequest,
     db: AsyncSession = Depends(get_db),
@@ -293,7 +293,7 @@ async def vulnerability(
         return ApiResponse(
             is_success=True,
             errors=[],
-            response=result
+            response=VulnerabilityFileResponse(file_id=request.file_id,content=result)
         )
     except ValueError as ex:
 
@@ -301,6 +301,8 @@ async def vulnerability(
             status_code=400,
             message=str(ex)
         )
+    except RuntimeError as e:
+        raise AppException(status_code=429, message=str(e))
     except Exception as ex:
 
         raise AppException(
@@ -336,6 +338,8 @@ async def optimization(
             status_code=400,
             message=str(ex)
         )
+    except RuntimeError as e:
+        raise AppException(status_code=429, message=str(e))
     except Exception as ex:
 
         raise AppException(

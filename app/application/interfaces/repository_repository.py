@@ -58,5 +58,6 @@ class IRepositoryRepository(ABC):
             language=repository_model.language,
             visibility=repository_model.visibility,
             created_at=repository_model.created_at,
-            updated_at=repository_model.updated_at
+            updated_at=repository_model.updated_at,
+            stars_count = repository_model.stars_count
         )

@@ -102,6 +102,7 @@ class RepositoryResponse(RepositoryRequestBase):
     owner_name: str
     created_at: str
     updated_at: str
+    stars_count: int
 
     class Config:
         from_attributes = True
@@ -117,6 +118,9 @@ class GenerateReadmeRequest(BaseModel):
     en_response:bool
 
 class GenerateReadmeResponse(BaseModel):
-    has_before:bool
     content: str | None
     file_path:str | None
+
+class ToggleStarResponse(BaseModel):
+    starred: bool
+    stars_count: int

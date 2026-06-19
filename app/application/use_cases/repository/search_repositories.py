@@ -2,9 +2,8 @@
     IRepositoryRepository
 )
 
-from app.application.interfaces.repository_search_service import (
-    IRepositorySearchService
-)
+from app.infrastructure.repositories.ai_request_repository import AIRequestRepository
+from app.infrastructure.services.ai_service import AIService
 
 
 class SearchRepositoriesUseCase:
@@ -12,10 +11,12 @@ class SearchRepositoriesUseCase:
     def __init__(
         self,
         repository_repository: IRepositoryRepository,
-        search_service: IRepositorySearchService
+        ai_service: AIService,
+        ai_request_repository: AIRequestRepository,
     ):
         self.repository_repository = repository_repository
-        self.search_service = search_service
+        self.ai_service = ai_service
+        self.ai_request_repository = ai_request_repository
 
     async def execute(
         self,
@@ -36,9 +37,12 @@ class SearchRepositoriesUseCase:
             }
             for repo in repositories
         ]
-
+        await self.ai_request_repository.create(
+            user_id=None,
+            service="repository_search"
+        )
         repository_ids = (
-            await self.search_service.search(
+            await self.ai_service.search(
                 query=query,
                 repositories=repositories_data
             )

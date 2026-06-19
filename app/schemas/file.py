@@ -49,6 +49,10 @@ class OptimizationFileResponse(BaseModel):
     file_id: int
     content: str
 
+class VulnerabilityFileResponse(BaseModel):
+    file_id: int
+    content: str
+
 class ChangeFileContentRequest(BaseModel):
     file_id: int
     content: str

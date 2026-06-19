@@ -21,6 +21,7 @@ class Repository:
     language: str = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+    stars_count: int = 0
 
     def to_dict(self) -> dict:
         return {
@@ -31,6 +32,7 @@ class Repository:
             "visibility": self.visibility.value,
             "description": self.description,
             "language": self.language,
+            "stars_count": self.stars_count,
             "created_at":format_dt(self.created_at),
             "updated_at": format_dt(self.updated_at),
         }

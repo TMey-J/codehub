@@ -13,7 +13,7 @@ from app.infrastructure.database.session import get_db
 from app.schemas import ApiResponse
 from app.schemas.Pagination import PagedResponse
 from app.schemas.repository import RepositoryResponse, UpdateRepositoryCommand, DeleteRepositoryCommand, \
-    SearchRepositoryRequest, GenerateReadmeRequest, GenerateReadmeResponse
+    SearchRepositoryRequest, GenerateReadmeRequest, GenerateReadmeResponse, ToggleStarResponse
 
 router = APIRouter()
 
@@ -129,18 +129,7 @@ async def get_repositories(
         )
     )
 
-@router.get("/{owner_name}/{repo_name}", response_model=ApiResponse[RepositoryResponse])
-async def get_repository(owner_name:str,repo_name:str,
-    db: AsyncSession = Depends(get_db)
 
-):
-    try:
-        use_case = await dependencies.get_get_repository_use_case(db)
-        repository:Repository = await use_case.execute(repo_name=repo_name,owner_name=owner_name)
-        return ApiResponse(is_success=True,errors=[],
-                           response=RepositoryResponse(**repository.to_dict()))
-    except ValueError as e:
-        raise AppException(status_code=404, message=str(e))
 
 @router.post(
     "/search",
@@ -184,7 +173,10 @@ async def search_repositories(
                 for repo in repositories
             ]
         )
-
+    except ValueError as e:
+        raise AppException(status_code=400, message=str(e))
+    except RuntimeError as e:
+        raise AppException(status_code=429, message=str(e))
     except Exception as ex:
 
         raise AppException(
@@ -207,20 +199,104 @@ async def generate_readme(
         result = await use_case.execute(
             request.repository_id,is_en=request.en_response
         )
-        has_before = result["has_before"]
         content = result["content"]
         file_path = result["file_path"]
 
         return ApiResponse(
             is_success=True,
             errors=[],
-            response=GenerateReadmeResponse(has_before=has_before, content=content, file_path=file_path)
+            response=GenerateReadmeResponse(content=content, file_path=file_path)
         )
     except ValueError as e:
-        raise AppException(status_code=404, message=str(e))
+        raise AppException(status_code=400, message=str(e))
+    except RuntimeError as e:
+        raise AppException(status_code=429, message=str(e))
     except Exception as ex:
 
         raise AppException(
             status_code=500,
             message=str(ex)
         )
+@router.post(
+    "/{repository_id}/star",
+    response_model=
+    ApiResponse[ToggleStarResponse]
+)
+async def toggle_star(
+    repository_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(
+        get_current_user
+    )
+):
+    try:
+
+        use_case = (
+            await dependencies
+            .get_toggle_repository_star_use_case(
+                db,
+                current_user
+            )
+        )
+
+        result = await use_case.execute(
+            repository_id
+        )
+
+        return ApiResponse(
+            is_success=True,
+            errors=[],
+            response=ToggleStarResponse(
+                **result
+            )
+        )
+    except ValueError as e:
+        raise AppException(status_code=400, message=str(e))
+
+@router.get(
+    "/{repository_id}/isStarred",
+    response_model=ApiResponse[bool]
+)
+async def check_star(
+    repository_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(
+        get_current_user
+    )
+):
+    try:
+        print("right pathhhhhhhhhhhhh")
+        use_case = (
+            await dependencies
+            .get_check_star_use_case(
+                db,
+                current_user
+            )
+        )
+
+        result = await use_case.execute(
+            repository_id
+        )
+
+        return ApiResponse(
+            is_success=True,
+            errors=[],
+            response=result
+        )
+    except ValueError as e:
+        raise AppException(status_code=400, message=str(e))
+
+@router.get("/{owner_name}/{repo_name}", response_model=ApiResponse[RepositoryResponse])
+async def get_repository(owner_name:str,repo_name:str,
+    db: AsyncSession = Depends(get_db)
+
+):
+    try:
+        use_case = await dependencies.get_get_repository_use_case(db)
+        repository:Repository = await use_case.execute(repo_name=repo_name,owner_name=owner_name)
+        return ApiResponse(is_success=True,errors=[],
+                           response=RepositoryResponse(**repository.to_dict()))
+    except ValueError as e:
+        raise AppException(status_code=404, message=str(e))
+
+

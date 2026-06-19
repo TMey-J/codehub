@@ -11,6 +11,8 @@ from app.infrastructure.database.base import Base
 from app.infrastructure.database.models.user import UserModel
 from app.infrastructure.database.models.repository import RepositoryModel
 from app.infrastructure.database.models.file import FileModel
+from app.infrastructure.database.models.star import RepositoryStarModel
+from app.infrastructure.database.models.ai_request import AIRequestModel
 
 # this is the Alembic Config object
 config = context.config

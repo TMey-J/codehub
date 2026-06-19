@@ -16,3 +16,12 @@ class UserModel(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     repositories = relationship("RepositoryModel", back_populates="owner", cascade="all, delete-orphan")
+    stars = relationship(
+        "RepositoryStarModel",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
+    ai_requests = relationship(
+        "AIRequestModel",
+        back_populates="user"
+    )

@@ -265,7 +265,6 @@ async def check_star(
     )
 ):
     try:
-        print("right pathhhhhhhhhhhhh")
         use_case = (
             await dependencies
             .get_check_star_use_case(

@@ -1,12 +1,73 @@
 ﻿from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 from typing import Optional
+
+from sqlalchemy.orm import selectinload
+
 from app.domain.entities.user import User
 from app.application.interfaces.user_repository import IUserRepository
+from app.infrastructure.database.models.file import FileModel
+from app.infrastructure.database.models.repository import RepositoryModel
 from app.infrastructure.database.models.user import UserModel
+from app.schemas.user_profile import UserProfileResponse
 
 
 class UserRepository(IUserRepository):
+    async def get_profile(
+        self,
+        username: str,
+        page: int = 1,
+        take: int = 20
+    ) -> UserProfileResponse | None:
+
+        result = await self.session.execute(
+            select(UserModel)
+            .where(UserModel.username == username)
+        )
+
+        user = result.scalar_one_or_none()
+
+        if user is None:
+            return None
+
+        repositories_count = await self.session.scalar(
+            select(func.count(RepositoryModel.id))
+            .where(RepositoryModel.owner_id == user.id)
+        ) or 0
+
+        files_count = await self.session.scalar(
+            select(func.count(FileModel.id))
+            .join(
+                RepositoryModel,
+                RepositoryModel.id == FileModel.repository_id
+            )
+            .where(RepositoryModel.owner_id == user.id)
+        ) or 0
+
+        received_stars = await self.session.scalar(
+            select(func.coalesce(func.sum(RepositoryModel.stars_count), 0))
+            .where(RepositoryModel.owner_id == user.id)
+        ) or 0
+
+        repositories = (
+            await self.session.execute(
+                select(RepositoryModel)
+                .where(RepositoryModel.owner_id == user.id)
+                .offset((page - 1) * take)
+                .limit(take)
+            )
+        ).scalars().all()
+        repositories_entity=[self._map_to_domain(repository) for repository in repositories]
+        return {
+            "username": user.username,
+            "created_at": user.created_at,
+            "repositories_count": repositories_count,
+            "files_count": files_count,
+            "received_stars": received_stars,
+            "repositories": repositories_entity,
+            "repositories_total": repositories_count
+        }
+
     def __init__(self, session: AsyncSession):
         self.session = session
 

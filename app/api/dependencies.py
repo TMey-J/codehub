@@ -21,6 +21,7 @@ from app.application.use_cases.repository.get_repository import GetRepositoryUse
 from app.application.use_cases.repository.search_repositories import SearchRepositoriesUseCase
 from app.application.use_cases.repository.toggle_star import ToggleRepositoryStarUseCase
 from app.application.use_cases.repository.update_repository import UpdateRepositoryUseCase
+from app.application.use_cases.user.user_profile import GetUserProfileUseCase
 from app.domain.entities.user import User
 from app.infrastructure.repositories.ai_request_repository import AIRequestRepository
 from app.infrastructure.repositories.dashboard_repository import DashboardRepository
@@ -236,4 +237,13 @@ async def get_check_star_use_case(
             RepositoryStarRepository(db),
 
         user=user
+    )
+
+async def get_user_profile_use_case(
+    db: AsyncSession,
+):
+    user_repository = UserRepository(db)
+
+    return GetUserProfileUseCase(
+        user_repository=user_repository
     )

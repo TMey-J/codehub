@@ -1,0 +1,280 @@
+﻿/* تعریف متغیرها */
+:root {
+    --primary-green: #12542e;
+    --accent-gold: #cebc54;
+    --light-gold: #e6dca1;
+    --border-radius: 12px;
+    --font-main: 'Vazir', Tahoma, Arial, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #ffffff;
+    font-family: var(--font-main);
+    display: flex;
+    justify-content: center;
+    align-items: center; /* وسط‌چین عمودی برای دسکتاپ خوب است */
+    min-height: 100vh;
+    direction: rtl;
+    padding: 15px;
+}
+
+/* --- بخش ورود (Login Section) --- */
+#login-section {
+    width: 100%;
+    max-width: 450px;
+    background: #fff;
+    border: 2px solid var(--light-gold);
+    border-radius: var(--border-radius);
+    padding: 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+#login-section header h2 {
+    color: var(--accent-gold);
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#login-form label {
+    font-weight: bold;
+    color: #333;
+}
+
+#login-form input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-family: var(--font-main);
+}
+
+#login-button {
+    background-color: var(--primary-green);
+    color: white;
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.error-msg, .error-message {
+    color: red;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+/* --- بخش مسابقه (Quiz Container) --- */
+.quiz-container {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.quiz-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.quiz-header h1 {
+    color: var(--accent-gold);
+    font-size: 2.5rem;
+}
+
+.quiz-main {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 20px;
+}
+
+.media-section {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.video-placeholder {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #eee;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+}
+
+.video-placeholder iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.timer-bar {
+    display: flex;
+    align-items: center;
+    background-color: var(--primary-green);
+    border-radius: 20px;
+    height: 70px;
+    overflow: hidden;
+}
+
+.timer-text {
+    color: #fff;
+    font-size: 1.5rem;
+    padding: 0 20px;
+    flex: 1;
+}
+
+.timer-value {
+    background-color: var(--accent-gold);
+    color: #000;
+    font-weight: 900;
+    font-size: 2rem;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0 30px;
+}
+
+.question-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.question-number, .question-text, .option-box {
+    border: 2px solid var(--light-gold);
+    border-radius: var(--border-radius);
+    padding: 15px;
+    background: #fff;
+}
+
+.question-number { font-weight: bold; }
+.question-text {
+    min-height: 150px;
+    font-size: 1.2rem;
+    line-height: 1.6;
+}
+
+.option-box {
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom:5px
+}
+
+.option-box:hover {
+    background-color: #fdfcee;
+    border-color: var(--accent-gold);
+}
+
+/* --- ریسپانسیو (Responsive) --- */
+
+/* تبلت و لپ‌تاپ‌های کوچک */
+@media (max-width: 950px) {
+    .quiz-main {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* موبایل (اصلاح شده برای جلوگیری از پایین آمدن بیش از حد) */
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+        align-items: flex-start; /* تغییر کلیدی: چسباندن محتوا به بالای صفحه در موبایل */
+        padding-top: 30px; /* کمی فاصله از بالا */
+    }
+
+    #login-section { padding: 20px; }
+
+    .quiz-header h1 { font-size: 1.8rem; }
+
+    .timer-bar { height: 60px; }
+    .timer-text { font-size: 1.1rem; padding: 0 15px; }
+    .timer-value { font-size: 1.6rem; padding: 0 20px; }
+
+    .question-text { min-height: 120px; font-size: 1.1rem; }
+    .option-box { font-size: 1rem; }
+
+    .answer-textarea {
+        padding: 12px; /* کمی کاهش پدینگ */
+        min-height: 120px; /* کمی کاهش ارتفاع اولیه در موبایل */
+        font-size: 1rem;
+    }
+}
+.text-danger {
+    color: red;
+}
+
+.answer-textarea {
+    width: 100%;
+    min-height: 150px;
+    padding: 15px;
+    border: 2px solid var(--light-gold);
+    border-radius: var(--border-radius);
+    background: #fff;
+    font-family: var(--font-main);
+    font-size: 1.1rem;
+    line-height: 1.6;
+    resize: vertical; /* اجازه می‌دهد کاربر ارتفاع را تغییر دهد ولی عرض ثابت بماند */
+    transition: all 0.2s ease;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.answer-textarea:focus {
+    border-color: var(--accent-gold); /* رنگ طلایی در هنگام کلیک */
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(206, 188, 84, 0.2);
+}
+
+.submit-answer-btn {
+    display: block;
+    width: 100%;
+    padding: 12px 20px;
+    background-color: var(--accent-gold);
+    color: var(--dark-blue);
+    border: none;
+    border-radius: var(--border-radius);
+    font-family: var(--font-main);
+    font-weight: bold;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 10px; /* فاصله از بالای دکمه */
+}
+
+.submit-answer-btn:hover {
+    background-color: #d4c57a; /* کمی روشن‌تر هنگام هاور */
+}
+
+/* استایل دکمه وقتی غیرفعال می‌شود */
+.submit-answer-btn:disabled {
+    background-color: #ccc;
+    color: #666;
+    cursor: not-allowed;
+    border-color: #bbb;
+}
+
+/* استایل ریسپانسیو برای موبایل */
+@media (max-width: 600px) {
+    .submit-answer-btn {
+        padding: 10px 15px;
+        font-size: 1rem;
+    }
+}

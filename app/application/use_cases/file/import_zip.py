@@ -1,5 +1,6 @@
 ﻿import asyncio
 import shutil
+from datetime import datetime, timezone
 from pathlib import Path
 from zipfile import ZipFile
 from fastapi import UploadFile
@@ -103,3 +104,5 @@ class ImportZipUseCase:
         temp_zip.unlink(
             missing_ok=True
         )
+        repository.updated_at = datetime.now(timezone.utc)
+        await self.repository_repository.update(repository)

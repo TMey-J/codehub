@@ -1,0 +1,155 @@
+﻿<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت لایو ها</title>
+    <link rel="stylesheet" href="/static/css/pico.min.css">
+    <style>
+
+        article {
+            margin: 0 !important;
+        }
+         .password-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .password-box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 300px;
+            text-align: center;
+        }
+
+        .password-box input {
+            width: 100%;
+            padding: 10px;
+            margin: 15px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .password-box button {
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .error {
+            color: red;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .logout-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="password-overlay" id="password-overlay" style="display: none">
+        <div class="password-box">
+            <h3>ورود به پنل مدیریت</h3>
+            <input type="password" id="password-input" placeholder="رمز عبور" autofocus>
+            <button id="submit-password">ورود</button>
+            <div class="error" id="error-msg">رمز عبور اشتباه است</div>
+        </div>
+    </div>
+    <main class="container" style="display: none;">
+
+        <header class="page-header">
+            <h1>مدیریت لایو ها</h1>
+            <a href="/admin/details" role="button">افزودن لایو جدید</a>
+        </header>
+
+        <!-- لیست لایو ها -->
+        <div class="livestreams-grid">
+
+        </div>
+    </main>
+    <script src="/static/js/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Check if already authenticated
+            const isAuthenticated = localStorage.getItem('admin_auth') === 'true';
+
+            if (isAuthenticated) {
+                showAdminPanel();
+            }
+            else{
+                $('#password-overlay').fadeIn();
+            }
+
+
+            // Handle password submission
+            $('#submit-password').on('click', function() {
+                const password = $('#password-input').val();
+
+                $.ajax({
+                    url: '/admin/check-password',
+                    method: 'POST',
+                    data: { password: password },
+                    success: function(response) {
+                        if (response.success) {
+                            // Store in browser
+                            localStorage.setItem('admin_auth', 'true');
+                            showAdminPanel();
+                        } else {
+                            $('#error-msg').show();
+                            $('#password-input').val('').focus();
+                            setTimeout(function() {
+                                $('#error-msg').fadeOut();
+                            }, 2000);
+                        }
+                    }
+                });
+            });
+
+            // Enter key support
+            $('#password-input').on('keypress', function(e) {
+                if (e.which === 13) {
+                    $('#submit-password').click();
+                }
+            });
+
+            // Logout
+            $('#logout-btn').on('click', function() {
+                localStorage.removeItem('admin_auth');
+                location.reload();
+            });
+
+            function showAdminPanel() {
+                $('#password-overlay').fadeOut();
+                $('.container').fadeIn();
+            }
+        });
+    </script>
+    <script src="/static/js/dashboard.js"></script>
+
+</body>
+</html>

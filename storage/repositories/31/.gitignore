@@ -1,0 +1,31 @@
+﻿# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+.python-version
+# --- IDEs / Editors ---
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- Database / Migration ---
+# اگر می‌خواهید دیتابیس لوکال کپی نشود
+*.db
+*.sqlite
+*.sqlite3
+
+# --- Deployment / Docker ---
+.dockerignore
+docker-compose.override.yml
+
+# --- Project Specific ---
+# فایل‌هایی که نمی‌خواهید در گیت باشند
+project_structure.txt
+logs/
+*.log
+
+storage/repositories/*
+tmp/*

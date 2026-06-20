@@ -1,0 +1,51 @@
+import axios from 'axios';
+
+const API_BASE_URL = 'https://back.coodhuub.ir:8000/api/v1';
+
+const api = axios.create({
+    baseURL: API_BASE_URL,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+});
+
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
+export const authService = {
+    login: (data) => api.post('/auth/login', data),
+    register: (data) => api.post('/auth/register', data),
+    getUserInfo: () => api.get('/auth/user-info'),
+};
+
+export const repoService = {
+    getAll: (page = 1, take = 9) => api.get('/repo/getAll', { params: { page, take } }),
+    getUser: (page = 1, take = 9) => api.get('/repo', { params: { page, take } }),
+    getOne: (ownerName, repoName) => api.get(`/repo/${ownerName}/${repoName}`),
+    create: (data) => api.post('/repo', data),
+    update: (data) => api.put('/repo', data),
+    delete: (data) => api.delete('/repo', { data }),
+    search: (data) => api.post('/repo/search', data),
+};
+
+export const fileService = {
+    getFiles: (repoId) => api.get(`/file/${repoId}/files`),
+    getContent: (repoId, fileId) => api.get(`/file/${repoId}/files/${fileId}/content`),
+    downloadFile: (repoId, fileId) => api.get(`/file/${repoId}/files/${fileId}/download`, { responseType: 'blob' }),
+    downloadRepository: (repoId) => api.get(`/file/${repoId}/download`, { responseType: 'blob' }), 
+    deleteFile: (repoId, fileId) => api.delete(`/file/${repoId}/files/${fileId}`),
+    uploadFiles: (repoId, formData) => api.post(`/file/${repoId}/files`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+    importZip: (repoId, formData) => api.post(`/file/${repoId}/import`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+};
+
+export default api;
+export const downloadRepo = (repoId) => api.get(`/file/${repoId}/download`, { responseType: 'blob' });

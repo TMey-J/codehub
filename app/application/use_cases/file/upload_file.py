@@ -96,3 +96,6 @@ class UploadFileUseCase:
                 await self.file_repository.create(
                     file_entity
                 )
+                repository.updated_at = datetime.now(timezone.utc)
+                await self.repository_repository.update(repository)
+

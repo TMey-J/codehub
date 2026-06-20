@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #d9d9d9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .calculator {
+            width: 300px;
+            background: #d9d9d9;
+            border-radius: 8px;
+            padding: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .display {
+            background: #2d2d2d;
+            border: 2px inset #666;
+            border-radius: 4px;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            text-align: right;
+            color: #00ff99;
+            font-size: 28px;
+            font-weight: bold;
+            min-height: 60px;
+            word-break: break-all;
+            font-family: 'Segoe UI', monospace;
+        }
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+        }
+        .button-grid button {
+            font-size: 16px;
+            font-weight: bold;
+            padding: 12px 0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.15s;
+            background: #f0f0f0;
+            color: #1a1a1a;
+        }
+        .button-grid button:active {
+            transform: scale(0.95);
+        }
+        .button-grid .operator {
+            background: #ff8c00;
+            color: white;
+        }
+        .button-grid .operator:active {
+            background: #e07b00;
+        }
+        .button-grid .equals {
+            background: #0078d7;
+            color: white;
+        }
+        .button-grid .equals:active {
+            background: #0062b0;
+        }
+        .button-grid .clear, .button-grid .backspace {
+            background: #c0392b;
+            color: white;
+        }
+        .button-grid .clear:active, .button-grid .backspace:active {
+            background: #a93226;
+        }
+        .button-grid .span-two {
+            grid-column: span 2;
+        }
+        .button-grid .empty {
+            background: none;
+            cursor: default;
+            pointer-events: none;
+        }
+        .footer {
+            margin-top: 6px;
+            text-align: center;
+            font-size: 12px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="display" id="display"></div>
+        <div class="button-grid" id="buttonGrid">
+            <!-- Row 1 -->
+            <button data-value="7">7</button>
+            <button data-value="8">8</button>
+            <button data-value="9">9</button>
+            <button data-value="/" class="operator">/</button>
+            <!-- Row 2 -->
+            <button data-value="4">4</button>
+            <button data-value="5">5</button>
+            <button data-value="6">6</button>
+            <button data-value="*" class="operator">*</button>
+            <!-- Row 3 -->
+            <button data-value="1">1</button>
+            <button data-value="2">2</button>
+            <button data-value="3">3</button>
+            <button data-value="-" class="operator">-</button>
+            <!-- Row 4 -->
+            <button data-value="0">0</button>
+            <button data-value=".">.</button>
+            <button data-value="=" class="equals">=</button>
+            <button data-value="+" class="operator">+</button>
+            <!-- Row 5 -->
+            <button data-value="C" class="clear">C</button>
+            <button data-value="⌫" class="backspace">⌫</button>
+            <button data-value="(">(</button>
+            <button data-value=")">)</button>
+            <!-- Row 6 -->
+            <button data-value="sqrt" class="span-two">sqrt</button>
+            <button data-value="^">^</button>
+            <div class="empty"></div> <!-- filler for grid alignment -->
+        </div>
+        <div class="footer">press keys or click buttons</div>
+    </div>
+
+    <script>
+        (function() {
+            // DOM elements
+            const display = document.getElementById('display');
+            const buttons = document.querySelectorAll('#buttonGrid button[data-value]');
+
+            // Current expression string
+            let currentExpression = '';
+
+            // Update display
+            function updateDisplay(text) {
+                display.textContent = text;
+            }
+
+            // Send expression to backend and update display with result
+            async function evaluate(expr) {
+                try {
+                    const response = await fetch('/evaluate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ expression: expr })
+                    });
+                    if (!response.ok) {
+                        throw new Error('Server error');
+                    }
+                    const data = await response.json();
+                    return data.result;
+                } catch (error) {
+                    console.error('Evaluation error:', error);
+                    return 'Error';
+                }
+            }
+
+            // Handle a button click or key press
+            async function handleInput(value) {
+                if (value === '=') {
+                    if (currentExpression === '') return;
+                    const result = await evaluate(currentExpression);
+                    updateDisplay(result);
+                    if (result !== 'Error') {
+                        currentExpression = result;
+                    } else {
+                        currentExpression = '';
+                    }
+                } else if (value === 'C') {
+                    currentExpression = '';
+                    updateDisplay('');
+                } else if (value === '⌫') {
+                    currentExpression = currentExpression.slice(0, -1);
+                    updateDisplay(currentExpression);
+                } else {
+                    currentExpression += value;
+                    updateDisplay(currentExpression);
+                }
+            }
+
+            // Attach click handlers to buttons
+            buttons.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    const value = this.dataset.value;
+                    handleInput(value);
+                });
+            });
+
+            // Keyboard support
+            document.addEventListener('keydown', function(e) {
+                const key = e.key;
+                // Prevent default for special keys to avoid page actions
+                if (key === 'Enter' || key === 'Backspace' || key === 'Escape') {
+                    e.preventDefault();
+                }
+
+                // Map keys
+                if (key === 'Enter') {
+                    handleInput('=');
+                } else if (key === 'Backspace') {
+                    handleInput('⌫');
+                } else if (key === 'Escape') {
+                    handleInput('C');
+                } else if (/^[0-9.+\-*/^()]$/.test(key)) {
+                    handleInput(key);
+                } else if (key === 's') {
+                    handleInput('sqrt');
+                }
+                // Ignore other keys
+            });
+        })();
+    </script>
+</body>
+</html>

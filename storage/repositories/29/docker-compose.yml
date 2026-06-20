@@ -1,0 +1,55 @@
+﻿version: '3.8'
+
+services:
+  live_app:
+    build: .
+    restart: always
+    # در محیط واقعی نیازی به مپ کردن کل پوشه پروژه نیست، اما اگر مایلید بماند:
+    volumes:
+      - .:/app
+    ports:
+      - "2001:2001"
+    depends_on:
+      live_db:
+        condition: service_healthy # صبر می‌کند تا دیتابیس کاملاً آماده بکار شود
+    env_file:
+      - .env
+    # --- بهینه‌سازی منابع و شبکه برای سرور خانگی ---
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'       # حداکثر استفاده از ۲ هسته CPU (جلوگیری از ۱۰۰٪ شدن و هنگ سرور)
+          memory: 4000M     # حداکثر ۴ گیگابایت رم برای اپلیکیشن FastAPI
+        reservations:
+          memory: 1000M     # رزرو حداقل ۱ گیگابایت رم
+    ulimits:
+      nofile:
+        soft: 65535         # افزایش محدودیت تعداد فایل/وب‌سوکت‌های باز
+        hard: 65535
+
+  live_db:
+    image: postgres:15-alpine # نسخه سبک‌تر آلپاین برای مصرف کمتر رم و پردازنده
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - .env
+    ports:
+      - "127.0.0.1:5000:5432" # پورت دیتابیس را بستیم تا فقط از خود سرور دسترسی باشد (امنیت)
+    # --- بهینه‌سازی منابع دیتابیس ---
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2000M     # حداکثر ۲ گیگابایت رم برای پستگرس
+        reservations:
+          memory: 512M
+    # تست سلامت دیتابیس قبل از بالا آمدن وب‌سایت
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:

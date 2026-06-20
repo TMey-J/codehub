@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multi-Thread Downloader</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body { height:100%; background:#1a1a1a; font-family:system-ui, sans-serif; }
+    #app { height:100%; }
+    ::-webkit-scrollbar { width:6px; }
+    ::-webkit-scrollbar-track { background:#2d2d2d; }
+    ::-webkit-scrollbar-thumb { background:#444; border-radius:3px; }
+    progress { appearance:none; -webkit-appearance:none; background:#444; border-radius:4px; height:18px; border:none; }
+    progress::-webkit-progress-bar { background:#444; border-radius:4px; }
+    progress::-webkit-progress-value { background:#3498db; border-radius:4px; transition:width 0.3s; }
+    progress::-moz-progress-bar { background:#3498db; border-radius:4px; }
+    button { transition:all 0.2s; }
+    button:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 2px 8px rgba(0,0,0,0.3); }
+    button:active:not(:disabled) { transform:translateY(0); }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <script type="module" src="dist/main.js"></script>
+</body>
+</html>

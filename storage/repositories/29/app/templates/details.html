@@ -1,0 +1,77 @@
+﻿<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پنل مدیریت لایو</title>
+    <link rel="stylesheet" href="/static/css/pico.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+
+    </style>
+</head>
+<body>
+    <main class="container" style="display:none">
+        <article>
+            <header class="page-header">
+                <h1>ویرایش لایو</h1>
+                <a href="/admin" role="button">همه لایو ها</a>
+            </header>
+
+            <form id="livestream-form">
+                <div class="grid" style="display:none">
+                    <label for="admin_secret">
+                        کلید ویرایش (Admin Secret)
+                        <input type="text" id="admin_secret" name="admin_secret" placeholder="برای ایجاد لایو جدید، خالی بگذارید">
+                    </label>
+                    <button type="button" id="load-livestream" style="margin-top: 1.5rem;">بارگذاری اطلاعات</button>
+                </div>
+                <label for="title">
+                    عنوان لایو
+                    <input type="text" id="title" name="title" placeholder="مثال: مسابقه هفتگی شماره ۵" required>
+                </label>
+
+                <label for="iframe_link">
+                    لینک Iframe
+                    <input type="text" id="iframe_link" name="iframe_link" placeholder="لینک ویدیوی لایو (Iframe)" required>
+                </label>
+<!--                <label for="iframe_link">لینک Iframe آپارات</label>-->
+<!--                <input type="text" id="iframe_link" name="iframe_link" placeholder="<iframe src='...' ></iframe>" required>-->
+
+                <hr>
+
+                <h3>سوالات</h3>
+                <button type="button" id="toggle-questions-btn" class="secondary">
+                    ▶ نمایش سوالات
+                </button>
+                <div id="toggle-div" style="display: none;">
+                    <div id="questions-container">
+                        <!-- سوالات به صورت داینامیک اینجا اضافه می‌شوند -->
+                    </div>
+                    <button type="button" id="add-question" class="secondary">افزودن سوال جدید</button>
+                </div>
+                <hr>
+                <button type="submit" id="submit-btn">ایجاد لایو جدید</button>
+            </form>
+
+            <div id="dashboard-actions" style="display:none;" class="result-box">
+                <section>
+                    <h4>مدیریت لایو</h4>
+                    <div class="grid">
+                        <button type="button" id="pend-btn" class="contrast">در انتظار</button>
+                        <button type="button" id="start-btn" class="contrast">شروع لایو</button>
+                        <button type="button" id="stop-btn" class="contrast">توقف لایو</button>
+                    </div>
+                </section>
+
+                <section id="links-container">
+                    <!-- لینک‌ها اینجا نمایش داده می‌شوند -->
+                </section>
+            </div>
+        </article>
+    </main>
+
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/admin.js"></script>
+</body>
+</html>

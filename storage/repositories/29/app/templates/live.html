@@ -1,0 +1,78 @@
+﻿<!-- backend/app/templates/live.html -->
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پخش زنده</title>
+    <link rel="stylesheet" href="/static/css/live.css">
+    <style>
+
+    </style>
+</head>
+<body>
+    <main class="container" style="padding:0 display:none">
+        <!-- بخش ورود کاربر که در ابتدا نمایش داده می‌شود -->
+        <div id="login-section">
+            <article>
+                <header>
+                    <h2>ورود به برنامه زنده</h2>
+                </header>
+                <form id="login-form">
+                    <label for="full_name">نام و نام خانوادگی</label>
+                    <input type="text" id="full_name" name="full_name" required>
+
+                    <label for="phone_number">شماره تماس</label>
+                    <input type="tel" id="phone_number" name="phone_number" required placeholder="مثال: 09123456789">
+                    <div id="phone_error" class="error-msg"></div>
+                    <button type="submit" id="login-button">ورود</button>
+                    <small id="login-error" class="error-message"></small>
+                </form>
+            </article>
+        </div>
+
+
+    </main>
+    <div class="quiz-container" style="display: none;">
+        <header class="quiz-header">
+            <h1 id="title"></h1>
+        </header>
+
+        <main class="quiz-main">
+
+            <section class="media-section">
+                <div class="video-placeholder">
+
+                </div>
+
+                <div class="timer-bar">
+                    <div class="timer-text">زمان باقی مانده</div>
+                    <div class="timer-value" id="countdown">00:00</div>
+                </div>
+            </section>
+
+            <section class="question-section">
+                <div class="question-number">
+                </div>
+
+                <div class="question-text">
+
+                </div>
+                <div id="options-container" style="display:none">
+
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+
+    <!-- این اسکریپت برای دسترسی به public_id در فایل js ضروری است -->
+    <script>
+        const publicId = "{{ public_id }}";
+        const iframe_link="{{ iframe_link }}"
+    </script>
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/live.js"></script>
+</body>
+</html>

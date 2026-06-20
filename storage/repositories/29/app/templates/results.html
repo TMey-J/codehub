@@ -1,0 +1,47 @@
+﻿<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نتایج نهایی لایو</title>
+    <link rel="stylesheet" href="/static/css/pico.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <main class="container" style="display:none">
+        <nav>
+            <ul><li><strong>نتایج نهایی لایو</strong></li></ul>
+        </nav>
+
+        <article>
+            <hgroup>
+                <h2 id="livestream-title"></h2>
+                <p>رتبه‌بندی کاربران بر اساس تعداد پاسخ‌های صحیح.</p>
+            </hgroup>
+
+            <table role="grid">
+                <thead>
+                    <tr>
+                        <th scope="col">رتبه</th>
+                        <th scope="col">نام کامل</th>
+                        <th scope="col">شماره تماس</th>
+                        <th scope="col">پاسخ‌های صحیح</th>
+                    </tr>
+                </thead>
+                <tbody id="results-table-body">
+                    <!-- نتایج کاربران به صورت داینامیک اینجا بارگذاری می‌شوند -->
+                </tbody>
+            </table>
+
+            <div id="no-results" style="display:none;">
+                <p>هنوز هیچ پاسخی توسط کاربران ثبت نشده است.</p>
+            </div>
+        </article>
+    </main>
+    <script>
+        const admin_secret = "{{ admin_secret }}";
+    </script>
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/results.js"></script>
+</body>
+</html>

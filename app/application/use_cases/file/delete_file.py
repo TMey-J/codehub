@@ -1,4 +1,5 @@
 ﻿import os
+from datetime import datetime, timezone
 
 from app.application.interfaces.file_repository import IFileRepository
 from app.application.interfaces.repository_repository import IRepositoryRepository
@@ -57,5 +58,7 @@ class DeleteFileUseCase:
         await self.file_repository.remove(
             file.id
         )
+        repository.updated_at = datetime.now(timezone.utc)
+        await self.repository_repository.update(repository)
 
         return True

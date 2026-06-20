@@ -4,6 +4,7 @@ from typing import Optional
 
 from sqlalchemy.orm import selectinload
 
+from app.domain.entities.repository import RepositoryVisibility
 from app.domain.entities.user import User
 from app.application.interfaces.user_repository import IUserRepository
 from app.infrastructure.database.models.file import FileModel
@@ -33,6 +34,7 @@ class UserRepository(IUserRepository):
         repositories_count = await self.session.scalar(
             select(func.count(RepositoryModel.id))
             .where(RepositoryModel.owner_id == user.id)
+            .where(RepositoryModel.visibility == RepositoryVisibility.PUBLIC)
         ) or 0
 
         files_count = await self.session.scalar(
@@ -42,17 +44,20 @@ class UserRepository(IUserRepository):
                 RepositoryModel.id == FileModel.repository_id
             )
             .where(RepositoryModel.owner_id == user.id)
+            .where(RepositoryModel.visibility == RepositoryVisibility.PUBLIC)
         ) or 0
 
         received_stars = await self.session.scalar(
             select(func.coalesce(func.sum(RepositoryModel.stars_count), 0))
             .where(RepositoryModel.owner_id == user.id)
+            .where(RepositoryModel.visibility == RepositoryVisibility.PUBLIC)
         ) or 0
 
         repositories = (
             await self.session.execute(
                 select(RepositoryModel)
                 .where(RepositoryModel.owner_id == user.id)
+                .where(RepositoryModel.visibility == RepositoryVisibility.PUBLIC)
                 .offset((page - 1) * take)
                 .limit(take)
             )

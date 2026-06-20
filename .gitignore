@@ -27,5 +27,5 @@ project_structure.txt
 logs/
 *.log
 
-storage/repositories/*
+#storage/repositories/*
 tmp/*

@@ -12,3 +12,4 @@ alembic
 python-multipart
 swagger-ui-bundle
 sambanova
+pytest
